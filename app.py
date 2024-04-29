@@ -14,7 +14,7 @@ init_db(app)
 
 model_service = ModelService()
 
-@app.route('/')
+@app.route('/model')
 def index():
     return 'Hello world'
 
