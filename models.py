@@ -108,3 +108,16 @@ class Payment(db.Model):
     def __init__(self, user_id, payment_info_id):
         self.user_id = user_id
         self.payment_info_id = payment_info_id
+
+@dataclass
+class UserDatasets(db.Model):
+    __tablename__ = 'user_datasets'
+
+    id: int = Column(BigInteger, primary_key=True)
+    username: int = Column(Integer, ForeignKey('users.username'), nullable=False)
+    dataset_name: str = Column(String, nullable=False)
+    dataset_folder: str = Column(String, nullable=False)
+
+
+    def __init__(self, user_id):
+        self.user_id = user_id

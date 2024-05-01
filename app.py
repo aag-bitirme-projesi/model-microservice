@@ -42,5 +42,10 @@ def close_container():
     data = request.form
     return model_service.close_container(data)
 
+@app.route('/upload-dataset', methods=['POST'])
+def upload_dataset():
+    data = request.form
+    return model_service.upload_dataset(data)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=2000)

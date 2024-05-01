@@ -1,13 +1,16 @@
-from models import Model, User, DevelopersModel
+from models import Model, User, DevelopersModel, UserDatasets
 from docker_service import DockerService
 from flask import jsonify
 import requests
 from database import db
+from storage import get_s3_ayca
+import uuid
+import os
 
 class ModelService():
     
-    def __init__(self):
-        self.docker_service = DockerService()
+    #def __init__(self):
+        #self.docker_service = DockerService()
     
     def list_users(self):
         return jsonify(User.query.all())
@@ -90,5 +93,24 @@ class ModelService():
         self.docker_service.remove_docker_container(container_id)
         return jsonify("SUCCESS")
         
+    def upload_dataset(self, datasetDto):
+        username = datasetDto["username"]
+        dataset_name = datasetDto["dataset_name"]
+        dataset_folder = datasetDto["dataset_folder"]
+
+        S3_BUCKET_NAME = 'final-datasets'
+        new_folder = str(uuid.uuid1()) 
+        get_s3_ayca().put_object(Bucket=S3_BUCKET_NAME, Key=new_folder + '/')
         
-        
+        for root, dirs, files in os.walk(dataset_folder):
+            for file in files:
+                file_path = os.path.join(root, file)
+
+                # Upload each file to S3
+                s3_key = file_path.replace(dataset_folder, new_folder)  # Use relative path as S3 key
+                path = new_folder + '/' + str(file)
+                print(path)
+                get_s3_ayca().upload_file(file_path, S3_BUCKET_NAME, path)
+
+        dataset = UserDatasets(username, dataset_name, dataset_folder)
+        return jsonify(dataset)
