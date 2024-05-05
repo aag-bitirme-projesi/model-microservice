@@ -1,4 +1,4 @@
-from database import db
+from utils.database import db
 from sqlalchemy import Column, Date, String, BigInteger, Integer, Boolean, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -110,14 +110,28 @@ class Payment(db.Model):
         self.payment_info_id = payment_info_id
 
 @dataclass
+class ModelImages(db.Model):
+    __tablename__ = 'model_images'
+
+    id: int = Column(BigInteger, primary_key=True)
+    model_name: str = Column(String, nullable=False)
+    image_id: str = Column(String, nullable=False)
+    
+    def __init__(self, model_name, image_id):
+        self.model_name = model_name
+        self.image_id = image_id
+
+@dataclass
 class UserDatasets(db.Model):
     __tablename__ = 'user_datasets'
 
     id: int = Column(BigInteger, primary_key=True)
     username: int = Column(Integer, ForeignKey('users.username'), nullable=False)
     dataset_name: str = Column(String, nullable=False)
-    dataset_folder: str = Column(String, nullable=False)
+    file_id: str = Column(String, nullable=False)
 
 
-    def __init__(self, user_id):
-        self.user_id = user_id
+    def __init__(self, username, dataset_name, image_id):
+        self.username = username
+        self.dataset_name = dataset_name
+        self.file_id = image_id

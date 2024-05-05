@@ -1,9 +1,8 @@
-from flask import Flask, request, jsonify
-from dotenv import load_dotenv
-from database import init_db
 import os
-
-from model_service import ModelService
+from flask import Flask
+from dotenv import load_dotenv
+from utils.database import init_db
+from model_blueprint import model_bp
 
 load_dotenv()
 
@@ -12,40 +11,8 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USERNAME')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
 init_db(app)
 
-model_service = ModelService()
-
-@app.route('/model')
-def index():
-    return 'Hello world'
-
-@app.route('/upload-model', methods=['POST'])
-def upload_model():
-    data = request.form
-    return model_service.upload_model(data)
-
-@app.route('/all', methods=['GET'])
-def all():
-    return model_service.list_models()
-
-@app.route('/remove-model', methods=['DELETE'])
-def remove_model():
-    data = request.form
-    return model_service.remove_model(data)
-
-@app.route('/run-model', methods=['POST'])
-def run_model():
-    data = request.form
-    return model_service.run_model(data)
-
-@app.route('/close-container', methods=['GET'])
-def close_container():
-    data = request.form
-    return model_service.close_container(data)
-
-@app.route('/upload-dataset', methods=['POST'])
-def upload_dataset():
-    data = request.form
-    return model_service.upload_dataset(data)
+app.register_blueprint(model_bp, url_prefix='/model')
 
 if __name__ == '__main__':
     app.run(debug=True, port=2000)
+    

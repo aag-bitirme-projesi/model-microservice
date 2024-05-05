@@ -1,16 +1,16 @@
-from models import Model, User, DevelopersModel, UserDatasets
-from docker_service import DockerService
+from utils.models import Model, User, DevelopersModel, UserDatasets
+from utils.docker_service import DockerService
 from flask import jsonify
 import requests
-from database import db
-from storage import get_s3_ayca
+from utils.database import db
+from utils.storage import get_s3_ayca
 import uuid
 import os
 
 class ModelService():
     
-    #def __init__(self):
-        #self.docker_service = DockerService()
+    def __init__(self):
+        self.docker_service = DockerService()
     
     def list_users(self):
         return jsonify(User.query.all())
