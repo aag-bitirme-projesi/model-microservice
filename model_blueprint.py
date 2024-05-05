@@ -10,9 +10,9 @@ model_service = ModelService()
 
 @model_bp.route('/upload-model', methods=['POST'])
 def upload_model():
-    #TODO Upload images
     data = request.form
-    return model_service.upload_model(data)
+    images = request.files.getlist('files')
+    return model_service.upload_model(data, images)
 
 @model_bp.route('/all', methods=['GET'])
 def all():

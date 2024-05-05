@@ -3,7 +3,7 @@ from utils.docker_service import DockerService
 from flask import jsonify
 import requests
 from utils.database import db
-from utils.storage import get_s3_ayca
+from utils.storage import get_s3_ayca, StorageService
 import uuid
 import os
 
@@ -11,11 +11,12 @@ class ModelService():
     
     def __init__(self):
         self.docker_service = DockerService()
+        self.s3_service = StorageService()
     
     def list_users(self):
         return jsonify(User.query.all())
 
-    def upload_model(self, model_dto):
+    def upload_model(self, model_dto, images):
         username = model_dto['username']
         modelName = model_dto['name']
         dockerImage = model_dto['dockerImage']
@@ -34,6 +35,9 @@ class ModelService():
             db.session.rollback()
             return jsonify("FAIL")
             
+        for image in images:
+            self.s3_service.upload_model_image(keyname, image)
+            
         return jsonify(model)
     
     def list_models(self):
@@ -44,6 +48,13 @@ class ModelService():
             .join(User, User.username == DevelopersModel.user_id) \
                 .filter(User.username == username).all()
         return jsonify(models)
+    
+    def get_model_images(self, model_dto):
+        username = model_dto['username']
+        modelName = model_dto['name']
+        
+        keyname = f'{username}\{modelName}'
+        return jsonify(self.s3_service.get_model_images(keyname))
 
     def remove_model(self, model_dto):
         username = model_dto['username']
