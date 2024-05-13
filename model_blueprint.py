@@ -35,7 +35,6 @@ def close_container():
 
 @model_bp.route('/upload-dataset', methods=['POST'])
 def upload_dataset():
-    # TODO FUCK THIS SHIT
     data = request.form
     return model_service.upload_dataset(data)
 
