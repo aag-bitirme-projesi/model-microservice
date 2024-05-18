@@ -97,20 +97,24 @@ class ModelService():
         username = datasetDto["username"]
         dataset_name = datasetDto["dataset_name"]
         dataset_folder = datasetDto["dataset_folder"]
+        folder_name = dataset_folder.split("/")[-1]
 
-        S3_BUCKET_NAME = 'final-datasets'
+        S3_BUCKET_NAME = 'final-datasets1'
         new_folder = str(uuid.uuid1()) 
         get_s3_ayca().put_object(Bucket=S3_BUCKET_NAME, Key=new_folder + '/')
         
         for root, dirs, files in os.walk(dataset_folder):
             for file in files:
+                if str(file) == ".DS_Store":
+                    continue 
                 file_path = os.path.join(root, file)
-
+                f = file_path.split(folder_name)[-1]
                 # Upload each file to S3
                 s3_key = file_path.replace(dataset_folder, new_folder)  # Use relative path as S3 key
-                path = new_folder + '/' + str(file)
+                
+                path = new_folder + f
                 print(path)
                 get_s3_ayca().upload_file(file_path, S3_BUCKET_NAME, path)
-
+                
         dataset = UserDatasets(username, dataset_name, dataset_folder)
         return jsonify(dataset)
