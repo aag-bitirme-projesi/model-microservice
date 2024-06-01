@@ -134,7 +134,9 @@ class ModelService():
         return jsonify(dataset)
     
     def get_my_datasets(self, username):
-        return jsonify(UserDatasets.query.filter(UserDatasets.username==username))
+        datasets = UserDatasets.query.filter(UserDatasets.username == username).all()
+        datasets_list = [dataset.to_dict() for dataset in datasets]
+        return jsonify(datasets_list)
     
     def delete_datasets(self, ids):
         try:

@@ -50,7 +50,7 @@ class Model(db.Model):
     name: str = Column(String, name='model_name')
     price: float = Column(Float)
     description: str = Column(String)
-    createdAt: Date = Column(Date)
+    created_at: Date = Column(Date)
     availability: Boolean = Column(Boolean)
 
     def __init__(self, model_link, name, price, description):
@@ -58,13 +58,12 @@ class Model(db.Model):
         self.name = name
         self.price = price
         self.description = description
-        self.createdAt = datetime.today()
+        self.created_at = datetime.today()
         self.availability = True
 
 @dataclass
 class DevelopersModel(db.Model):
     __tablename__ = 'developers_models'
-
     id: int = Column(BigInteger, primary_key=True)
     developer: str = Column(String, ForeignKey('users.username'), nullable=False)
     model: int = Column(BigInteger, ForeignKey('models.id'), nullable=False)
@@ -138,11 +137,11 @@ class UserDatasets(db.Model):
     username: int = Column(Integer, ForeignKey('users.username'), nullable=False)
     dataset_name: str = Column(String, nullable=False)
     file_id: str = Column(String, nullable=False)
-    createdAt: datetime = Column(Date, nullable=False)
+    created_at: datetime = Column(Date, nullable=False)
 
 
-    def __init__(self, username, dataset_name, image_id, createdAt):
+    def __init__(self, username, dataset_name, image_id, created_at):
         self.username = username
         self.dataset_name = dataset_name
         self.file_id = image_id
-        self.createdAt = createdAt
+        self.created_at = created_at

@@ -18,6 +18,11 @@ def upload_model():
 
     return model_service.upload_model(data, images)
 
+@model_bp.route('/get-image', methods=['GET'])
+def get_image():
+    data = request.form
+    return model_service.get_model_images(data)
+
 @model_bp.route('/all', methods=['GET'])
 def all():
     return model_service.list_models()
@@ -42,10 +47,12 @@ def upload_dataset():
     data = request.form
     return model_service.upload_dataset(data)
 
-@model_bp.route('/my-datasets', methods=['POST'])
+@model_bp.route('/my-datasets', methods=['GET'])
 def get_my_datasets():
-    data = request.form
-    return model_service.upload_dataset(data["username"])
+    # data = request.form
+    username = request.args.get('username')
+    print("ussername: ", username)
+    return model_service.get_my_datasets(username)
 
 @model_bp.route('/delete-datasets', methods=['DELETE'])
 def delete_datasets():
