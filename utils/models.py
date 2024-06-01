@@ -1,9 +1,10 @@
 from utils.database import db
-from sqlalchemy import Column, Date, String, BigInteger, Integer, Boolean, Enum, ForeignKey
+from sqlalchemy import Column, Date, String, BigInteger, Integer, Boolean, Enum, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from enum import Enum as PythonEnum
 from dataclasses import dataclass
+from datetime import datetime
 
 class Role(str, PythonEnum):
     ADMIN = 'ADMIN'
@@ -47,10 +48,18 @@ class Model(db.Model):
     id: int = Column(BigInteger, primary_key=True)
     model_link: str = Column(String(512))
     name: str = Column(String, name='model_name')
+    price: float = Column(Float)
+    description: str = Column(String)
+    createdAt: Date = Column(Date)
+    availability: Boolean = Column(Boolean)
 
-    def __init__(self, model_link, name):
+    def __init__(self, model_link, name, price, description):
         self.model_link = model_link
         self.name = name
+        self.price = price
+        self.description = description
+        self.createdAt = datetime.today()
+        self.availability = True
 
 @dataclass
 class DevelopersModel(db.Model):
@@ -129,9 +138,11 @@ class UserDatasets(db.Model):
     username: int = Column(Integer, ForeignKey('users.username'), nullable=False)
     dataset_name: str = Column(String, nullable=False)
     file_id: str = Column(String, nullable=False)
+    createdAt: datetime = Column(Date, nullable=False)
 
 
-    def __init__(self, username, dataset_name, image_id):
+    def __init__(self, username, dataset_name, image_id, createdAt):
         self.username = username
         self.dataset_name = dataset_name
         self.file_id = image_id
+        self.createdAt = createdAt

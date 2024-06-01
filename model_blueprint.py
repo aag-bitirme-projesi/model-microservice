@@ -12,6 +12,10 @@ model_service = ModelService()
 def upload_model():
     data = request.form
     images = request.files.getlist('files')
+
+    print("Received form data:", data)
+    print("Received files:", images)
+
     return model_service.upload_model(data, images)
 
 @model_bp.route('/all', methods=['GET'])
@@ -37,6 +41,16 @@ def close_container():
 def upload_dataset():
     data = request.form
     return model_service.upload_dataset(data)
+
+@model_bp.route('/my-datasets', methods=['POST'])
+def get_my_datasets():
+    data = request.form
+    return model_service.upload_dataset(data["username"])
+
+@model_bp.route('/delete-datasets', methods=['DELETE'])
+def delete_datasets():
+    data = request.form
+    return model_service.delete_datasets(data["ids"])
 
 # TODO
 # TRAIN MODEL

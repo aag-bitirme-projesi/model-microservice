@@ -6,6 +6,7 @@ from utils.database import db
 from utils.storage import get_s3_ayca, StorageService
 import uuid
 import os
+from datetime import datetime
 
 class ModelService():
     
@@ -20,9 +21,11 @@ class ModelService():
         username = model_dto['username']
         modelName = model_dto['name']
         dockerImage = model_dto['dockerImage']
+        price = model_dto["price"]
+        description = model_dto["description"]
         
         keyname = f'{username}\{modelName}'
-        model = Model(dockerImage, keyname)
+        model = Model(dockerImage, keyname, price, description)
         db.session.add(model)
         db.session.commit()
         
@@ -127,5 +130,19 @@ class ModelService():
                 print(path)
                 get_s3_ayca().upload_file(file_path, S3_BUCKET_NAME, path)
                 
-        dataset = UserDatasets(username, dataset_name, dataset_folder)
+        dataset = UserDatasets(username, dataset_name, dataset_folder, datetime.today())
         return jsonify(dataset)
+    
+    def get_my_datasets(self, username):
+        return jsonify(UserDatasets.query.filter(UserDatasets.username==username))
+    
+    def delete_datasets(self, ids):
+        try:
+            db.session.query(UserDatasets).filter(UserDatasets.id.in_(ids)).delete(synchronize_session=False)
+            db.session.commit()
+            return "success"
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error occurred: {e}")
+        finally:
+            db.session.close()
