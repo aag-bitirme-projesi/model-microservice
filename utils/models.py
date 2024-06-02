@@ -134,14 +134,14 @@ class UserDatasets(db.Model):
     __tablename__ = 'user_datasets'
 
     id: int = Column(BigInteger, primary_key=True)
-    username: int = Column(Integer, ForeignKey('users.username'), nullable=False)
+    username: str = Column(String, ForeignKey('users.username'), nullable=False)
     dataset_name: str = Column(String, nullable=False)
     file_id: str = Column(String, nullable=False)
-    created_at: datetime = Column(Date, nullable=False)
+    created_at: datetime = Column(Date)
 
 
-    def __init__(self, username, dataset_name, image_id, created_at):
+    def __init__(self, username, dataset_name, file_id, created_at):
         self.username = username
         self.dataset_name = dataset_name
-        self.file_id = image_id
+        self.file_id = file_id
         self.created_at = created_at

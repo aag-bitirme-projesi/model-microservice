@@ -107,36 +107,56 @@ class ModelService():
         self.docker_service.remove_docker_container(container_id)
         return jsonify("SUCCESS")
         
-    def upload_dataset(self, datasetDto):
-        username = datasetDto["username"]
-        dataset_name = datasetDto["dataset_name"]
-        dataset_folder = datasetDto["dataset_folder"]
-        folder_name = dataset_folder.split("/")[-1]
+    # def upload_dataset(self, datasetDto):
+    #     username = datasetDto["username"]
+    #     dataset_name = datasetDto["dataset_name"]
+    #     dataset_folder = datasetDto["dataset_folder"]
+    #     folder_name = dataset_folder.split("/")[-1]
 
+    #     S3_BUCKET_NAME = 'final-datasets1'
+    #     new_folder = str(uuid.uuid1()) 
+    #     get_s3_ayca().put_object(Bucket=S3_BUCKET_NAME, Key=new_folder + '/')
+        
+    #     for root, dirs, files in os.walk(dataset_folder):
+    #         for file in files:
+    #             if str(file) == ".DS_Store":
+    #                 continue 
+    #             file_path = os.path.join(root, file)
+    #             f = file_path.split(folder_name)[-1]
+    #             # Upload each file to S3
+    #             s3_key = file_path.replace(dataset_folder, new_folder)  # Use relative path as S3 key
+                
+    #             path = new_folder + f
+    #             print(path)
+    #             get_s3_ayca().upload_file(file_path, S3_BUCKET_NAME, path)
+                
+    #     dataset = UserDatasets(username, dataset_name, dataset_folder, datetime.today())
+    #     return jsonify(dataset)
+
+    def upload_dataset(self, username, dataset_name, files):
         S3_BUCKET_NAME = 'final-datasets1'
         new_folder = str(uuid.uuid1()) 
         get_s3_ayca().put_object(Bucket=S3_BUCKET_NAME, Key=new_folder + '/')
-        
-        for root, dirs, files in os.walk(dataset_folder):
-            for file in files:
-                if str(file) == ".DS_Store":
-                    continue 
-                file_path = os.path.join(root, file)
-                f = file_path.split(folder_name)[-1]
-                # Upload each file to S3
-                s3_key = file_path.replace(dataset_folder, new_folder)  # Use relative path as S3 key
-                
-                path = new_folder + f
-                print(path)
-                get_s3_ayca().upload_file(file_path, S3_BUCKET_NAME, path)
-                
-        dataset = UserDatasets(username, dataset_name, dataset_folder, datetime.today())
+
+        for file in files:
+            # Maintaining the directory structure
+            file_path = file.filename
+            print("file path: ", file_path)
+            s3_key = os.path.join(new_folder, file_path)
+            get_s3_ayca().upload_fileobj(file, S3_BUCKET_NAME, s3_key)
+            # get_s3_ayca().upload_file(file_path, S3_BUCKET_NAME, path)
+
+        dataset = UserDatasets(username=username, dataset_name=dataset_name, file_id=new_folder, created_at=datetime.today())
+        db.session.add(dataset)
+        db.session.commit()
+
         return jsonify(dataset)
     
     def get_my_datasets(self, username):
         datasets = UserDatasets.query.filter(UserDatasets.username == username).all()
-        datasets_list = [dataset.to_dict() for dataset in datasets]
-        return jsonify(datasets_list)
+        print("datasets: ", datasets)
+        # datasets_list = [dataset.to_dict() for dataset in datasets]
+        return jsonify(datasets)
     
     def delete_datasets(self, ids):
         try:

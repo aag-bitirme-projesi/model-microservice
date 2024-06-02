@@ -20,7 +20,9 @@ def upload_model():
 
 @model_bp.route('/get-image', methods=['GET'])
 def get_image():
-    data = request.form
+    username = request.args.get('username')
+    model_name = request.args.get('name')
+    data = {'username': username, 'name': model_name}
     return model_service.get_model_images(data)
 
 @model_bp.route('/all', methods=['GET'])
@@ -45,7 +47,11 @@ def close_container():
 @model_bp.route('/upload-dataset', methods=['POST'])
 def upload_dataset():
     data = request.form
-    return model_service.upload_dataset(data)
+    files = request.files.getlist('files')
+    username = data.get('username')
+    dataset_name = data.get('dataset_name')
+    
+    return model_service.upload_dataset(username, dataset_name, files)
 
 @model_bp.route('/my-datasets', methods=['GET'])
 def get_my_datasets():
