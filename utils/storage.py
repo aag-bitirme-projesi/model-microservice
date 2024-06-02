@@ -33,8 +33,11 @@ class StorageService:
             model_images = ModelImages.query.filter_by(model_name=model_name).all()
             for model_image in model_images:
                 url = self.client.generate_presigned_url('get_object', 
-                                                         Params = {'Bucket': self.MODEL_IMAGES_BUCKET, 'Key': model_image.image_id}, 
-                                                         ExpiresIn = 60 * 60)
+                                                         Params = {'Bucket': self.MODEL_IMAGES_BUCKET, 
+                                                                   'Key': model_image.image_id,
+                                                                   'ResponseContentType': 'image/jpg'}, 
+                                                         ExpiresIn = 60 * 60
+                                                         )
                 images.append(url)
             return images
         except Exception as e:
