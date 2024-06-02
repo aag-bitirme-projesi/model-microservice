@@ -8,6 +8,8 @@ import uuid
 import os
 from datetime import datetime
 
+from sqlalchemy.inspection import inspect
+
 class ModelService():
     
     def __init__(self):
@@ -44,7 +46,16 @@ class ModelService():
         return jsonify(model)
     
     def list_models(self):
-        return jsonify(Model.query.all())
+        models = Model.query.all()
+        temp = []
+        for model in models:
+            images = self.s3_service.get_model_images(model.name)
+            model_dict = {c.key: getattr(model, c.key) for c in inspect(model).mapper.column_attrs}
+            print(type(model_dict))
+            model_dict['images'] = images
+            print(model_dict)
+            temp.append(model_dict)
+        return jsonify(temp)
         
     def list_models_by_username(self, username):
         models =  Model.query.join(DevelopersModel, Model.id == DevelopersModel.model_id) \
