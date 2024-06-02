@@ -92,7 +92,7 @@ class ModelService():
         
         model = Model.query.filter_by(name = keyname).first()
         if not model:
-            raise ValueError(f"User with username {username} not found")
+            raise ValueError(f"Model with keyname {keyname} not found")
         docker_image = model.model_link
         
         id, port = self.docker_service.run_docker_container(docker_image)

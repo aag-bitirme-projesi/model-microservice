@@ -50,7 +50,7 @@ class Model(db.Model):
     name: str = Column(String, name='model_name')
     price: float = Column(Float)
     description: str = Column(String)
-    createdAt: Date = Column(Date)
+    createdAt: Date = Column(Date, name='created_at')
     availability: Boolean = Column(Boolean)
 
     def __init__(self, model_link, name, price, description):

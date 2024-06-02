@@ -32,7 +32,7 @@ def run_model():
     data = request.form
     return model_service.run_model(data)
 
-@model_bp.route('/close-container', methods=['GET'])
+@model_bp.route('/close-container', methods=['POST'])
 def close_container():
     data = request.form
     return model_service.close_container(data)
