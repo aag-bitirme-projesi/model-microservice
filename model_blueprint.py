@@ -29,6 +29,11 @@ def get_image():
 def all():
     return model_service.list_models()
 
+@model_bp.route('/by-id', methods=['GET'])
+def get_model_by_id():
+    id = request.args.get('modelId')
+    return model_service.by_id(id)
+
 @model_bp.route('/remove-model', methods=['DELETE'])
 def remove_model():
     data = request.form

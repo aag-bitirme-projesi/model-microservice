@@ -56,7 +56,15 @@ class ModelService():
             print(model_dict)
             temp.append(model_dict)
         return jsonify(temp)
-        
+    
+    def by_id(self, id):
+        model = Model.query.filter_by(id = id)
+        image = self.s3_service.get_model_images(model.name)
+        model_dict = {c.key: getattr(model, c.key) for c in inspect(model).mapper.column_attrs}
+        model_dict['images'] = image
+
+        return jsonify(model_dict)
+
     def list_models_by_username(self, username):
         models =  Model.query.join(DevelopersModel, Model.id == DevelopersModel.model_id) \
             .join(User, User.username == DevelopersModel.user_id) \
@@ -68,6 +76,8 @@ class ModelService():
         modelName = model_dto['name']
         
         keyname = f'{username}\{modelName}'
+        print(keyname)
+        print(self.s3_service.get_model_images(keyname))
         return jsonify(self.s3_service.get_model_images(keyname))
 
     def remove_model(self, model_dto):
