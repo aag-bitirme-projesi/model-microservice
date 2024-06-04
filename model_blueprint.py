@@ -65,6 +65,13 @@ def delete_datasets():
     data = request.form
     return model_service.delete_datasets(data["ids"])
 
+@model_bp.route('/get-dataset', methods=['POST'])
+def get_dataset():
+    data = request.form
+    username = data.get('username')
+    dataset_name = data.get('dataset_name')
+    return model_service.get_dataset(username, dataset_name)
+
 # TODO
 # TRAIN MODEL
 # FUCK THIS SHIT ALSO

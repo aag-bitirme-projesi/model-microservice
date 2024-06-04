@@ -1,6 +1,6 @@
 from utils.models import Model, User, DevelopersModel, UserDatasets
 from utils.docker_service import DockerService
-from flask import jsonify
+from flask import jsonify, send_file
 import requests
 from utils.database import db
 from utils.storage import get_s3_ayca, StorageService
@@ -146,28 +146,80 @@ class ModelService():
 
     def upload_dataset(self, username, dataset_name, files):
         S3_BUCKET_NAME = 'final-datasets1'
-        new_folder = str(uuid.uuid1()) 
-        get_s3_ayca().put_object(Bucket=S3_BUCKET_NAME, Key=new_folder + '/')
-
-        for file in files:
-            # Maintaining the directory structure
-            file_path = file.filename
-            print("file path: ", file_path)
-            s3_key = os.path.join(new_folder, file_path)
-            get_s3_ayca().upload_fileobj(file, S3_BUCKET_NAME, s3_key)
-            # get_s3_ayca().upload_file(file_path, S3_BUCKET_NAME, path)
-
+        new_folder = uuid.uuid4().hex
+        
+        with open('temp.csv', 'w+', encoding="utf-8") as f:
+            for file in files:
+                root, dir, filename = os.path.normpath(file.filename).split(os.sep)
+                new_obj = uuid.uuid4().hex
+                get_s3_ayca().upload_fileobj(file, S3_BUCKET_NAME, new_obj)
+                f.write(f"{filename},{dir},{new_obj}\n")
+        
+        with open('temp.csv', 'rb') as f:
+            get_s3_ayca().upload_fileobj(f, S3_BUCKET_NAME, new_folder)
+            
+        os.remove('temp.csv')
+        
         dataset = UserDatasets(username=username, dataset_name=dataset_name, file_id=new_folder, created_at=datetime.today())
         db.session.add(dataset)
         db.session.commit()
-
+        
         return jsonify(dataset)
+    
+        # S3_BUCKET_NAME = 'final-datasets1'
+        # new_folder = str(uuid.uuid1()) 
+        # get_s3_ayca().put_object(Bucket=S3_BUCKET_NAME, Key=new_folder + '/')
+
+        # for file in files:
+        #     # Maintaining the directory structure
+        #     file_path = file.filename
+        #     print("file path: ", file_path)
+        #     s3_key = os.path.join(new_folder, file_path)
+        #     get_s3_ayca().upload_fileobj(file, S3_BUCKET_NAME, s3_key)
+        #     # get_s3_ayca().upload_file(file_path, S3_BUCKET_NAME, path)
+
+        # dataset = UserDatasets(username=username, dataset_name=dataset_name, file_id=new_folder, created_at=datetime.today())
+        # db.session.add(dataset)
+        # db.session.commit()
+
+        # return jsonify(dataset)
     
     def get_my_datasets(self, username):
         datasets = UserDatasets.query.filter(UserDatasets.username == username).all()
         print("datasets: ", datasets)
         # datasets_list = [dataset.to_dict() for dataset in datasets]
         return jsonify(datasets)
+    
+    def get_dataset(self, username, dataset_name):
+        S3_BUCKET_NAME = 'final-datasets1'
+        
+        # Retrieve the file_id from the UserDatasets table
+        dataset = UserDatasets.query.filter_by(username=username, dataset_name=dataset_name).first()
+        file_id = dataset.file_id
+        
+        get_s3_ayca().download_file(S3_BUCKET_NAME, file_id, 'temp.csv')
+        
+        with open('temp.csv', 'r', encoding="utf-8") as f:
+            lines = f.readlines()
+    
+        os.remove('temp.csv')
+        
+        with open('temp.csv', 'w+', encoding="utf-8") as f:
+            for line in lines:
+                if len(line.strip().split(',')) != 3:
+                    continue
+                
+                filename, label, image_id = line.strip().split(',')
+                url = get_s3_ayca().generate_presigned_url('get_object', 
+                                                             Params = {'Bucket': S3_BUCKET_NAME, 
+                                                                       'Key': image_id,
+                                                                       'ResponseContentType': 'image/jpg'}, 
+                                                             ExpiresIn = 30 * 24 * 60 * 60
+                                                             )
+                f.write(f"{filename},{label},{url}\n")
+                
+        return send_file('temp.csv', as_attachment=True)
+        
     
     def delete_datasets(self, ids):
         try:
