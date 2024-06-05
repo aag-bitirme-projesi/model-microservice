@@ -1,5 +1,10 @@
 import os
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy as BaseSQLAlchemy
+
+class SQLAlchemy(BaseSQLAlchemy):
+    def apply_pool_defaults(self, app, options):
+        super(SQLAlchemy, self).apply_pool_defaults(self, app, options)
+        options["pool_pre_ping"] = True
 
 db = SQLAlchemy()
 
