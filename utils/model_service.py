@@ -45,6 +45,27 @@ class ModelService():
             
         return jsonify(model)
     
+    def update_model(self, model_dto, images):
+        username = model_dto['username']
+        modelName = model_dto['name']
+        dockerImage = model_dto['dockerImage']
+        price = model_dto["price"]
+        description = model_dto["description"]
+        
+        keyname = f'{username}\{modelName}'
+        model = Model.query.filter_by(name = keyname).first()
+        if not model:
+            raise ValueError(f"Model with key {keyname} not found")
+        model.dockerImage = dockerImage if dockerImage else model.dockerImage
+        model.price = price if price else model.price
+        model.description = description if description else model.description
+        db.session.commit()
+        
+        for image in images:
+            self.s3_service.upload_model_image(keyname, image)
+        
+        return jsonify(model)
+    
     def list_models(self):
         models = Model.query.all()
         temp = []

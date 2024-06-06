@@ -18,6 +18,16 @@ def upload_model():
 
     return model_service.upload_model(data, images)
 
+@model_bp.route('/update-model', methods=['POST'])
+def update_model():
+    data = request.form
+    images = request.files.getlist('files')
+
+    print("Received form data:", data)
+    print("Received files:", images)
+
+    return model_service.update_model(data, images)
+
 @model_bp.route('/get-image', methods=['GET'])
 def get_image():
     username = request.args.get('username')
