@@ -8,6 +8,8 @@ import uuid
 import os
 from datetime import datetime
 
+import json
+
 from sqlalchemy.inspection import inspect
 
 class ModelService():
@@ -254,6 +256,8 @@ class ModelService():
     
     def delete_datasets(self, ids):
         try:
+            ids = json.loads(ids)
+            print(ids)
             db.session.query(UserDatasets).filter(UserDatasets.id.in_(ids)).delete(synchronize_session=False)
             db.session.commit()
             return "success"
@@ -262,3 +266,5 @@ class ModelService():
             print(f"Error occurred: {e}")
         finally:
             db.session.close()
+            
+        return jsonify('SUCCESS')

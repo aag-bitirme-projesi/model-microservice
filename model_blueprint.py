@@ -75,7 +75,7 @@ def get_my_datasets():
     print("ussername: ", username)
     return model_service.get_my_datasets(username)
 
-@model_bp.route('/delete-datasets', methods=['DELETE'])
+@model_bp.route('/delete-datasets', methods=['POST'])
 def delete_datasets():
     data = request.form
     return model_service.delete_datasets(data["ids"])
